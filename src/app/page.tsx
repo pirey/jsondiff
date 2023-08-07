@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import sample1 from "@/lib/st.json";
-import sample2 from "@/lib/ap.json";
+import sample1 from "@/lib/sample1.json";
+import sample2 from "@/lib/sample2.json";
 
 import { TextareaHTMLAttributes } from "react";
 import { Diff, DiffType, ObjDiff, parseDiff } from "@/lib/diff";
