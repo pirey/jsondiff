@@ -8,7 +8,7 @@ import { TextareaHTMLAttributes } from "react";
 import { Diff, DiffType, parseDiff } from "@/lib/diff";
 import { parseVal, resolveObj } from "@/lib/json";
 
-export function TextInput({
+function TextInput({
   error,
   children,
   ...restProps
@@ -64,7 +64,6 @@ function DiffResultView({ diff, onBack }: { diff: Diff; onBack: () => void }) {
       );
     case DiffType.Obj:
       return (
-        // <div className="w-full flex flex-grow items-start justify-between">
         <>
           <div className="mb-4">
             <button
@@ -181,6 +180,14 @@ export default function Home() {
                 Sample
               </button>
             )}
+            <a
+              className="block mt-10 font-bold underline text-center"
+              href="https://github.com/pirey/jsondiff"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Github
+            </a>
           </div>
 
           <TextInput
