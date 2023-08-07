@@ -31,7 +31,7 @@ type ArrDiff = {
   diff: Diff[];
 };
 
-type ObjDiff = {
+export type ObjDiff = {
   t: DiffType.Obj;
   // TODO: find out any matched children even though parent diff
   diff: Record<

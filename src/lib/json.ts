@@ -1,12 +1,3 @@
-export enum JsonType {
-  Str,
-  Num,
-  Bool,
-  Null,
-  Obj,
-  Arr,
-}
-
 export function isPrimitiveType(val: JsonVal): boolean {
   return (
     val.t === JsonType.Str ||
@@ -14,6 +5,15 @@ export function isPrimitiveType(val: JsonVal): boolean {
     val.t === JsonType.Bool ||
     val.t === JsonType.Null
   );
+}
+
+export enum JsonType {
+  Str,
+  Num,
+  Bool,
+  Null,
+  Obj,
+  Arr,
 }
 
 export type JsonVal = Str | Num | Bool | Null | Obj | Arr;

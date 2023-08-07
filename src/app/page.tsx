@@ -5,8 +5,8 @@ import sample1 from "@/lib/sample1.json";
 import sample2 from "@/lib/sample2.json";
 
 import { TextareaHTMLAttributes } from "react";
-import { Diff, DiffType, parseDiff } from "@/lib/diff";
-import { parseVal, resolveObj } from "@/lib/json";
+import { Diff, DiffType, ObjDiff, parseDiff } from "@/lib/diff";
+import { parseVal, resolveObj, resolveVal } from "@/lib/json";
 
 function TextInput({
   error,
@@ -43,7 +43,99 @@ function formatJsonString(str: string) {
   }
 }
 
-function DiffResultView({ diff, onBack }: { diff: Diff; onBack: () => void }) {
+function ObjDiffView({ diff, onBack }: { diff: ObjDiff; onBack: () => void }) {
+  const [step, setStep] = React.useState(1);
+  console.log("step", step);
+  return (
+    <>
+      <div className="mb-4 flex justify-around gap-2">
+        <button
+          onClick={onBack}
+          className="font-bold px-8 py-1 rounded text-black hover:underline"
+        >
+          Back
+        </button>
+        <button
+          onClick={() => {
+            console.log("test click 1");
+            setStep(1);
+          }}
+          className="px-4 py-1 rounded bg-gray-700 text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={step === 1}
+        >
+          Matches
+        </button>
+        <button
+          onClick={() => {
+            console.log("test click 2");
+            setStep(2);
+          }}
+          className="px-8 py-1 rounded bg-gray-700 text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          disabled={step === 2}
+        >
+          Diff
+        </button>
+      </div>
+      {step === 1 && (
+        <div className="flex flex-grow w-full justify-between">
+          <div className="flex flex-1 flex-col px-1">
+            <pre className="bg-gray-50 p-2 flex-1">
+              {JSON.stringify(resolveObj(diff.distinctLeft), null, 4)}
+            </pre>
+            <div className="p-2 bg-gray-200 text-black font-bold">
+              Left only
+            </div>
+          </div>
+          <div className="flex flex-1 flex-col px-1">
+            <pre className="bg-gray-50 p-2 flex-1">
+              {JSON.stringify(resolveObj(diff.match), null, 4)}
+            </pre>
+            <div className="p-2 bg-gray-200 text-black font-bold">Matches</div>
+          </div>
+          <div className="flex flex-1 flex-col px-1">
+            <pre className="bg-gray-50 p-2 flex-1">
+              {JSON.stringify(resolveObj(diff.distinctRight), null, 4)}
+            </pre>
+            <div className="p-2 bg-gray-200 text-black font-bold">
+              Right only
+            </div>
+          </div>
+        </div>
+      )}
+      {step === 2 && (
+        <div className="flex-grow w-full overflow-auto">
+          {Object.keys(diff.diff).map((key, i) => {
+            return (
+              <>
+                <div className="p-2 bg-gray-200 text-black font-bold">
+                  &quot;{key}&quot;
+                </div>
+                <div key={i} className="flex w-full justify-between mb-4">
+                  <div className="flex flex-1 flex-col px-1">
+                    <pre className="bg-gray-50 p-2">
+                      {JSON.stringify(resolveVal(diff.diff[key].left), null, 4)}
+                    </pre>
+                  </div>
+                  <div className="flex flex-1 flex-col px-1">
+                    <pre className="bg-gray-50 p-2">
+                      {JSON.stringify(
+                        resolveVal(diff.diff[key].right),
+                        null,
+                        4
+                      )}
+                    </pre>
+                  </div>
+                </div>
+              </>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+}
+
+function DiffView({ diff, onBack }: { diff: Diff; onBack: () => void }) {
   switch (diff.t) {
     case DiffType.Match:
       return <div>Matches</div>;
@@ -58,48 +150,12 @@ function DiffResultView({ diff, onBack }: { diff: Diff; onBack: () => void }) {
       return (
         <div>
           {diff.diff.map((d, i) => (
-            <DiffResultView key={i} diff={d} onBack={onBack} />
+            <DiffView key={i} diff={d} onBack={onBack} />
           ))}
         </div>
       );
     case DiffType.Obj:
-      return (
-        <>
-          <div className="mb-4">
-            <button
-              onClick={onBack}
-              className="px-8 py-1 rounded bg-gray-700 text-white hover:bg-gray-900"
-            >
-              Back
-            </button>
-          </div>
-          <div className="flex flex-grow w-full justify-between">
-            <div className="flex flex-1 flex-col px-1">
-              <TextInput
-                onChange={() => {}}
-                value={JSON.stringify(resolveObj(diff.distinctLeft), null, 4)}
-              />
-              <div className="p-2 bg-gray-200 text-black font-bold">Left</div>
-            </div>
-            <div className="flex flex-1 flex-col px-1">
-              <TextInput
-                onChange={() => {}}
-                value={JSON.stringify(resolveObj(diff.match), null, 4)}
-              />
-              <div className="p-2 bg-gray-200 text-black font-bold">
-                Matches
-              </div>
-            </div>
-            <div className="flex flex-1 flex-col px-1">
-              <TextInput
-                onChange={() => {}}
-                value={JSON.stringify(resolveObj(diff.distinctRight), null, 4)}
-              />
-              <div className="p-2 bg-gray-200 text-black font-bold">Right</div>
-            </div>
-          </div>
-        </>
-      );
+      return <ObjDiffView diff={diff} onBack={onBack} />;
 
     default:
       return <div>Unknown result</div>;
@@ -140,7 +196,7 @@ export default function Home() {
         <h1 className="font-black text-5xl">{"{JSON}Diff"}</h1>
       </div>
       {diffResult ? (
-        <DiffResultView
+        <DiffView
           diff={diffResult}
           onBack={() => {
             setDiffResult(undefined);
