@@ -52,12 +52,12 @@ type Arr = {
 
 // RESOLVE FUNCTION
 
-function resolveObj(objVal: Obj) {
-  return Object.keys(objVal.value).reduce<Record<string, unknown>>(function (
+export function resolveObj(objVal: ObjVal) {
+  return Object.keys(objVal).reduce<Record<string, unknown>>(function (
     acc,
     key
   ) {
-    acc[key] = resolveVal(objVal.value[key]);
+    acc[key] = resolveVal(objVal[key]);
     return acc;
   },
   {});
@@ -69,7 +69,7 @@ function resolveArr(arrVal: Arr) {
 
 export function resolveVal(jsonVal: JsonVal): unknown {
   if (jsonVal.t === JsonType.Obj) {
-    return resolveObj(jsonVal);
+    return resolveObj(jsonVal.value);
   }
 
   if (jsonVal.t === JsonType.Arr) {

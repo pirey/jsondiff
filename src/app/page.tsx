@@ -5,8 +5,8 @@ import sample1 from "@/lib/sample1.json";
 import sample2 from "@/lib/sample2.json";
 
 import { TextareaHTMLAttributes } from "react";
-import { diff } from "@/lib/diff";
-import { parseVal } from "@/lib/json";
+import { Diff, DiffType, parseDiff } from "@/lib/diff";
+import { parseVal, resolveObj } from "@/lib/json";
 
 export function TextInput({
   error,
@@ -23,11 +23,11 @@ export function TextInput({
       >
         {children}
       </textarea>
-      <div
-        className={`w-full h-8 ${error ? "bg-black" : "bg-white"} p-2`}
-      >
-        {error ? <span className="text-red-400">{error.message}</span> : null}
-      </div>
+      {error ? (
+        <div className={`w-full h-8 ${error ? "bg-black" : "bg-white"} p-2`}>
+          <span className="text-red-400">{error.message}</span>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -43,72 +43,164 @@ function formatJsonString(str: string) {
   }
 }
 
+function DiffResultView({ diff, onBack }: { diff: Diff; onBack: () => void }) {
+  switch (diff.t) {
+    case DiffType.Match:
+      return <div>Matches</div>;
+    case DiffType.Primitive:
+      return (
+        <div>
+          <div>left</div>
+          <div>right</div>
+        </div>
+      );
+    case DiffType.Arr:
+      return (
+        <div>
+          {diff.diff.map((d, i) => (
+            <DiffResultView key={i} diff={d} onBack={onBack} />
+          ))}
+        </div>
+      );
+    case DiffType.Obj:
+      return (
+        // <div className="w-full flex flex-grow items-start justify-between">
+        <>
+          <div className="mb-4">
+            <button
+              onClick={onBack}
+              className="px-8 py-1 rounded bg-gray-700 text-white hover:bg-gray-900"
+            >
+              Back
+            </button>
+          </div>
+          <div className="flex flex-grow w-full justify-between">
+            <div className="flex flex-1 flex-col px-1">
+              <TextInput
+                onChange={() => {}}
+                value={JSON.stringify(resolveObj(diff.distinctLeft), null, 4)}
+              />
+              <div className="p-2 bg-gray-200 text-black font-bold">Left</div>
+            </div>
+            <div className="flex flex-1 flex-col px-1">
+              <TextInput
+                onChange={() => {}}
+                value={JSON.stringify(resolveObj(diff.match), null, 4)}
+              />
+              <div className="p-2 bg-gray-200 text-black font-bold">
+                Matches
+              </div>
+            </div>
+            <div className="flex flex-1 flex-col px-1">
+              <TextInput
+                onChange={() => {}}
+                value={JSON.stringify(resolveObj(diff.distinctRight), null, 4)}
+              />
+              <div className="p-2 bg-gray-200 text-black font-bold">Right</div>
+            </div>
+          </div>
+        </>
+      );
+
+    default:
+      return <div>Unknown result</div>;
+  }
+}
+
 export default function Home() {
   const [errorLeft, setErrorLeft] = React.useState<Error>();
   const [errorRight, setErrorRight] = React.useState<Error>();
 
-  const [textLeft, setTextLeft] = React.useState(
-    JSON.stringify(sample1, null, 4)
-  );
-  const [textRight, setTextRight] = React.useState(
-    JSON.stringify(sample2, null, 4)
-  );
+  const [textLeft, setTextLeft] = React.useState("");
+  const [textRight, setTextRight] = React.useState("");
+
+  const [diffResult, setDiffResult] = React.useState<Diff>();
+
+  const fillSample = () => {
+    setTextLeft(JSON.stringify(sample1, null, 4));
+    setTextRight(JSON.stringify(sample2, null, 4));
+    setErrorLeft(undefined);
+    setErrorRight(undefined);
+  };
 
   const handleCompare = () => {
     try {
       const left = parseVal(JSON.parse(textLeft));
       const right = parseVal(JSON.parse(textRight));
-      const result = diff(left, right);
+      const result = parseDiff(left, right);
       console.log(result);
+      setDiffResult(result);
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="flex flex-grow w-full justify-between">
-        <TextInput
-          error={errorLeft}
-          onBlur={(e) => {
-            try {
-              setTextLeft(formatJsonString(e.target.value));
-              setErrorLeft(undefined);
-            } catch (error) {
-              setErrorLeft(error as Error);
-            }
-          }}
-          onChange={(e) => {
-            setTextLeft(e.target.value);
-          }}
-          value={textLeft}
-        />
-
-        <div className="mx-4">
-          <button
-            onClick={handleCompare}
-            className="px-4 py-2 rounded bg-blue-400 text-white hover:bg-blue-500"
-          >
-            Compare
-          </button>
-        </div>
-
-        <TextInput
-          error={errorRight}
-          onBlur={(e) => {
-            try {
-              setTextRight(formatJsonString(e.target.value));
-              setErrorRight(undefined);
-            } catch (error) {
-              setErrorRight(error as Error);
-            }
-          }}
-          onChange={(e) => {
-            setTextRight(e.target.value);
-          }}
-          value={textRight}
-        />
+    <main className="flex min-h-screen flex-col items-center justify-between p-16">
+      <div className="mb-8">
+        <h1 className="font-black text-5xl">{"{JSON}Diff"}</h1>
       </div>
+      {diffResult ? (
+        <DiffResultView
+          diff={diffResult}
+          onBack={() => {
+            setDiffResult(undefined);
+          }}
+        />
+      ) : (
+        <div className="flex flex-grow w-full justify-between">
+          <TextInput
+            error={errorLeft}
+            placeholder="Enter json here..."
+            onBlur={(e) => {
+              try {
+                setTextLeft(formatJsonString(e.target.value));
+                setErrorLeft(undefined);
+              } catch (error) {
+                setErrorLeft(error as Error);
+              }
+            }}
+            onChange={(e) => {
+              setTextLeft(e.target.value);
+            }}
+            value={textLeft}
+          />
+
+          <div className="mx-4 flex flex-col">
+            <button
+              disabled={
+                !!errorLeft || !!errorRight || (!textLeft && !textRight)
+              }
+              onClick={handleCompare}
+              className="px-4 py-1 rounded bg-gray-700 text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              Compare
+            </button>
+            {!textLeft && !textRight && (
+              <button className="mt-4 font-bold underline" onClick={fillSample}>
+                Sample
+              </button>
+            )}
+          </div>
+
+          <TextInput
+            error={errorRight}
+            placeholder="Enter json here..."
+            onBlur={(e) => {
+              try {
+                setTextRight(formatJsonString(e.target.value));
+                setErrorRight(undefined);
+              } catch (error) {
+                setErrorRight(error as Error);
+              }
+            }}
+            onChange={(e) => {
+              setTextRight(e.target.value);
+            }}
+            value={textRight}
+          />
+        </div>
+      )}
     </main>
   );
 }

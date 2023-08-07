@@ -1,20 +1,30 @@
 {
-  "id": 1,
-  "name": "John Doe",
-  "age": 30,
+  "id": 123,
+  "name": "Alice Smith",
+  "age": 28,
   "contact": {
-    "email": "johndoe@example.com",
-    "phone": "123-456-7890"
+    "email": "alice@example.com",
+    "phone": "555-123-4567"
   },
-  "address": {
-    "street": "123 Main St",
-    "city": "Anytown",
-    "country": "USA",
-    "coordinates": {
-      "latitude": 40.7128,
-      "longitude": -74.006
+  "hobbies": ["reading", "traveling", "painting"],
+  "education": {
+    "university": "University of City",
+    "degree": "Bachelor of Science",
+    "major": "Computer Science",
+    "graduationYear": 2017
+  },
+  "workExperience": [
+    {
+      "company": "TechCorp",
+      "position": "Software Engineer",
+      "startYear": 2017,
+      "endYear": 2022
     }
-  },
-  "hobbies": ["reading", "coding", "gaming"]
+  ],
+  "skills": {
+    "programming": ["JavaScript", "Python", "Java"],
+    "frameworks": ["React", "Node.js", "Spring Boot"],
+    "languages": ["English", "Spanish"]
+  }
 }
 

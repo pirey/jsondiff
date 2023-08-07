@@ -1,20 +1,39 @@
 {
-  "id": 1,
-  "name": "John Doe",
-  "age": 31,
+  "id": 123,
+  "name": "Alice Smith",
+  "age": 29,
   "contact": {
-    "email": "johndoe@example.com",
-    "phone": "987-654-3210"
+    "email": "alice@example.com",
+    "phone": "555-987-6543"
   },
   "address": {
-    "street": "456 Elm St",
-    "city": "Newtown",
+    "street": "456 Oak Ave",
+    "city": "Townsville",
     "country": "USA",
     "coordinates": {
-      "latitude": 34.0522,
-      "longitude": -118.2437
+      "latitude": 40.7128,
+      "longitude": -74.006
     }
   },
-  "hobbies": ["reading", "traveling", "painting"]
+  "hobbies": ["reading", "traveling", "cooking"],
+  "education": {
+    "university": "University of Town",
+    "degree": "Master of Science",
+    "major": "Data Science",
+    "graduationYear": 2016
+  },
+  "workExperience": [
+    {
+      "company": "TechCom",
+      "position": "Software Developer",
+      "startYear": 2016,
+      "endYear": 2020
+    }
+  ],
+  "skills": {
+    "programming": ["JavaScript", "Python", "C++"],
+    "frameworks": ["React", "Django", "TensorFlow"],
+    "languages": ["English", "French"]
+  }
 }
 
