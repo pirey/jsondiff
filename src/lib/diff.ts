@@ -91,7 +91,7 @@ function parseDiffObj(left: ObjVal, right: ObjVal): Diff {
         },
         diffRight: {
           ...acc.diffRight,
-          [currentKey]: left[currentKey]
+          [currentKey]: right[currentKey]
         },
         diff: {
           ...acc.diff,
