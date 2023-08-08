@@ -1,11 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { ButtonHTMLAttributes, TextareaHTMLAttributes } from "react";
 import sample1 from "@/lib/sample1.json";
 import sample2 from "@/lib/sample2.json";
 
-import { TextareaHTMLAttributes } from "react";
-import { Diff, DiffType, ObjDiff, parseDiff } from "@/lib/diff";
+import {
+  Diff,
+  DiffType,
+  ObjDiff,
+  parseDiff,
+} from "@/lib/diff";
 import { parseVal, resolveObj, resolveVal } from "@/lib/json";
 
 function formatJsonString(str: string) {
@@ -72,31 +76,89 @@ function ObjMatchesResultView({ diff }: { diff: ObjDiff }) {
   );
 }
 
-function ObjDiffView({ diff }: { diff: ObjDiff }) {
+function ObjDiffPerFieldView({
+  diff,
+  onChangeMode,
+}: {
+  diff: ObjDiff;
+  onChangeMode: () => void;
+}) {
   return (
-    <div className="flex-grow w-full overflow-auto">
-      {Object.keys(diff.diff).map((key, i) => {
-        return (
-          <>
-            <div className="p-2 bg-gray-200 text-black font-bold">
-              &quot;{key}&quot;
-            </div>
-            <div key={i} className="flex w-full justify-between">
-              <div className="flex flex-1 flex-col border-r overflow-auto">
-                <pre className="bg-gray-50 p-2 whitespace-pre-wrap">
-                  {JSON.stringify(resolveVal(diff.diff[key].left), null, 4)}
-                </pre>
+    <div className="flex flex-grow w-full overflow-hidden relative">
+      <div className="absolute top-4 right-6">
+        <Button onClick={onChangeMode}>Plain Text</Button>
+      </div>
+      <div className="flex-grow w-full overflow-auto">
+        {Object.keys(diff.diff).map((key, i) => {
+          return (
+            <React.Fragment key={i}>
+              <div className="p-2 bg-gray-200 text-black font-bold">
+                &quot;{key}&quot;
               </div>
-              <div className="flex flex-1 flex-col border-l overflow-auto">
-                <pre className="bg-gray-50 p-2 whitespace-pre-wrap">
-                  {JSON.stringify(resolveVal(diff.diff[key].right), null, 4)}
-                </pre>
+              <div className="flex w-full justify-between">
+                <div className="flex flex-1 flex-col border-r overflow-auto">
+                  <pre className="bg-gray-50 p-2 whitespace-pre-wrap">
+                    {JSON.stringify(resolveVal(diff.diff[key].left), null, 4)}
+                  </pre>
+                </div>
+                <div className="flex flex-1 flex-col border-l overflow-auto">
+                  <pre className="bg-gray-50 p-2 whitespace-pre-wrap">
+                    {JSON.stringify(resolveVal(diff.diff[key].right), null, 4)}
+                  </pre>
+                </div>
               </div>
-            </div>
-          </>
-        );
-      })}
+            </React.Fragment>
+          );
+        })}
+      </div>
     </div>
+  );
+}
+
+function ObjDiffPlainView({
+  diff,
+  onChangeMode,
+}: {
+  diff: ObjDiff;
+  onChangeMode: () => void;
+}) {
+  return (
+    <div className="flex flex-grow w-full overflow-hidden relative">
+      <div className="absolute top-4 right-6">
+        <Button onClick={onChangeMode}>Per Field</Button>
+      </div>
+      <div className="flex justify-between flex-grow w-full overflow-hidden">
+        <div className="flex flex-col flex-1 mr-1">
+          <TextInput
+            onChange={() => {}}
+            value={JSON.stringify(resolveObj(diff.diffLeft), null, 4)}
+            className="flex-grow"
+          />
+          <div className="p-2 bg-gray-200 text-black font-bold">Left</div>
+        </div>
+        <div className="flex flex-col flex-1 ml-1">
+          <TextInput
+            onChange={() => {}}
+            value={JSON.stringify(resolveObj(diff.diffRight), null, 4)}
+            className="flex-grow"
+          />
+          <div className="p-2 bg-gray-200 text-black font-bold">Right</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Button(
+  props: {
+    children: React.ReactNode;
+  } & ButtonHTMLAttributes<HTMLButtonElement>
+) {
+  return (
+    <button
+      className={`px-4 py-1 rounded bg-gray-700 text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed ${props.className}`}
+      {...props}
+    />
   );
 }
 
@@ -106,13 +168,9 @@ function StepButton(props: {
   children: React.ReactNode;
 }) {
   return (
-    <button
-      onClick={props.onClick}
-      className="px-4 py-1 rounded bg-gray-700 text-white hover:bg-gray-900 disabled:bg-gray-400 disabled:cursor-not-allowed"
-      disabled={props.disabled}
-    >
+    <Button onClick={props.onClick} disabled={props.disabled}>
       {props.children}
-    </button>
+    </Button>
   );
 }
 
@@ -124,6 +182,7 @@ function ObjResultView({
   onBack: () => void;
 }) {
   const [step, setStep] = React.useState(1);
+  const [diffViewMode, setDiffViewMode] = React.useState("plain");
   return (
     <>
       <div className="mb-4 flex justify-center gap-2">
@@ -151,7 +210,18 @@ function ObjResultView({
         </StepButton>
       </div>
       {step === 1 && <ObjMatchesResultView diff={diff} />}
-      {step === 2 && <ObjDiffView diff={diff} />}
+      {step === 2 && diffViewMode === "per_field" && (
+        <ObjDiffPerFieldView
+          diff={diff}
+          onChangeMode={() => setDiffViewMode("plain")}
+        />
+      )}
+      {step === 2 && diffViewMode === "plain" && (
+        <ObjDiffPlainView
+          diff={diff}
+          onChangeMode={() => setDiffViewMode("per_field")}
+        />
+      )}
     </>
   );
 }

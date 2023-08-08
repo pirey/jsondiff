@@ -42,8 +42,10 @@ export type ObjDiff = {
     }
   >;
   match: ObjVal;
-  distinctLeft: ObjVal
-  distinctRight: ObjVal
+  diffLeft: ObjVal;
+  diffRight: ObjVal;
+  distinctLeft: ObjVal;
+  distinctRight: ObjVal;
 };
 
 function parseDiffObj(left: ObjVal, right: ObjVal): Diff {
@@ -83,6 +85,14 @@ function parseDiffObj(left: ObjVal, right: ObjVal): Diff {
 
       return {
         ...acc,
+        diffLeft: {
+          ...acc.diffLeft,
+          [currentKey]: left[currentKey]
+        },
+        diffRight: {
+          ...acc.diffRight,
+          [currentKey]: left[currentKey]
+        },
         diff: {
           ...acc.diff,
           [currentKey]: {
@@ -96,12 +106,14 @@ function parseDiffObj(left: ObjVal, right: ObjVal): Diff {
       t: DiffType.Obj,
       diff: {},
       match: {},
+      diffLeft: {},
+      diffRight: {},
       distinctRight: {},
       distinctLeft: {},
     }
   );
 
-  return result
+  return result;
 }
 
 function parseDiffPrimitive(left: JsonVal, right: JsonVal): Diff {
