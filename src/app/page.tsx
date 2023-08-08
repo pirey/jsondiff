@@ -174,6 +174,16 @@ function StepButton(props: {
   );
 }
 
+enum ObjResultViewMode {
+  Diff,
+  Matches
+}
+
+enum ObjDiffViewMode {
+  Plain,
+  PerField
+}
+
 function ObjResultView({
   diff,
   onBack,
@@ -181,8 +191,8 @@ function ObjResultView({
   diff: ObjDiff;
   onBack: () => void;
 }) {
-  const [step, setStep] = React.useState(1);
-  const [diffViewMode, setDiffViewMode] = React.useState("plain");
+  const [viewMode, setViewMode] = React.useState(ObjResultViewMode.Diff);
+  const [diffViewMode, setDiffViewMode] = React.useState(ObjDiffViewMode.Plain);
   return (
     <>
       <div className="mb-4 flex justify-center gap-2">
@@ -194,32 +204,32 @@ function ObjResultView({
         </button>
         <StepButton
           onClick={() => {
-            setStep(1);
+            setViewMode(ObjResultViewMode.Diff);
           }}
-          disabled={step === 1}
-        >
-          Matches
-        </StepButton>
-        <StepButton
-          onClick={() => {
-            setStep(2);
-          }}
-          disabled={step === 2}
+          disabled={viewMode === ObjResultViewMode.Diff}
         >
           Diff
         </StepButton>
+        <StepButton
+          onClick={() => {
+            setViewMode(ObjResultViewMode.Matches);
+          }}
+          disabled={viewMode === ObjResultViewMode.Matches}
+        >
+          Matches
+        </StepButton>
       </div>
-      {step === 1 && <ObjMatchesResultView diff={diff} />}
-      {step === 2 && diffViewMode === "per_field" && (
+      {viewMode === ObjResultViewMode.Matches && <ObjMatchesResultView diff={diff} />}
+      {viewMode === ObjResultViewMode.Diff && diffViewMode === ObjDiffViewMode.PerField && (
         <ObjDiffPerFieldView
           diff={diff}
-          onChangeMode={() => setDiffViewMode("plain")}
+          onChangeMode={() => setDiffViewMode(ObjDiffViewMode.Plain)}
         />
       )}
-      {step === 2 && diffViewMode === "plain" && (
+      {viewMode === ObjResultViewMode.Diff && diffViewMode === ObjDiffViewMode.Plain && (
         <ObjDiffPlainView
           diff={diff}
-          onChangeMode={() => setDiffViewMode("per_field")}
+          onChangeMode={() => setDiffViewMode(ObjDiffViewMode.PerField)}
         />
       )}
     </>
@@ -262,14 +272,14 @@ export default function Home() {
 
   const [diffResult, setDiffResult] = React.useState<Diff>();
 
-  const fillSample = () => {
+  const handleFillSample = () => {
     setTextLeft(JSON.stringify(sample1, null, 4));
     setTextRight(JSON.stringify(sample2, null, 4));
     setErrorLeft(undefined);
     setErrorRight(undefined);
   };
 
-  const clear = () => {
+  const handleClear = () => {
     if (window.confirm("You sure?")) {
       setTextLeft("");
       setTextRight("");
@@ -336,12 +346,12 @@ export default function Home() {
               {!textLeft && !textRight ? (
                 <button
                   className="mt-4 font-bold underline"
-                  onClick={fillSample}
+                  onClick={handleFillSample}
                 >
                   Sample
                 </button>
               ) : (
-                <button className="mt-4 font-bold underline" onClick={clear}>
+                <button className="mt-4 font-bold underline" onClick={handleClear}>
                   Clear
                 </button>
               )}
